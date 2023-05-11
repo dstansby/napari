@@ -112,6 +112,12 @@ class TypedMutableSequence(MutableSequence[_T]):
     def __getitem__(self, key: int) -> _T:
         ...  # pragma: no cover
 
+    # Have to type key as Any, since the types stored in self._lookup
+    # are only determined at runtime
+    @overload
+    def __getitem__(self, key: Any) -> _T:
+        ... # pragma: no cover
+
     @overload
     def __getitem__(self, key: slice) -> 'TypedMutableSequence[_T]':
         ...  # pragma: no cover

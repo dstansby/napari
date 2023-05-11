@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Sequence
+from typing import Sequence, TypeVar, Tuple
 
 import numpy as np
 import toolz as tz
@@ -42,7 +42,7 @@ class Transform:
         if func is tz.identity:
             self._inverse_func = tz.identity
 
-    def __call__(self, coords):
+    def __call__(self, coords) -> Tuple[float, float, float]:
         """Transform input coordinates to output."""
         return self.func(coords)
 
@@ -109,7 +109,9 @@ class Transform:
         [self.__dict__.pop(p, None) for p in cached_properties]
 
 
-class TransformChain(EventedList, Transform):
+_T = TypeVar('_T', bound=Transform)
+
+class TransformChain(EventedList[_T], Transform, TypeVar[_T]):
     def __init__(self, transforms=None) -> None:
         if transforms is None:
             transforms = []

@@ -656,7 +656,7 @@ def line_in_triangles_3d(
 
 def find_front_back_face(
     click_pos: np.ndarray, bounding_box: np.ndarray, view_dir: np.ndarray
-):
+) -> Tuple[np.ndarray, np.ndarray]:
     """Find the faces of an axis aligned bounding box a
     click intersects with.
 

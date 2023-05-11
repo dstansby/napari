@@ -326,7 +326,7 @@ class Layer(KeymapProvider, MousemapProvider, ABC):
             scale = [1] * ndim
         if translate is None:
             translate = [0] * ndim
-        self._transforms = TransformChain(
+        self._transforms: TransformChain[Affine] = TransformChain(
             [
                 Affine(np.ones(ndim), np.zeros(ndim), name='tile2data'),
                 CompositeAffine(
@@ -359,7 +359,7 @@ class Layer(KeymapProvider, MousemapProvider, ABC):
             TransformBoxOverlay,
         )
 
-        self._overlays = EventedDict()
+        self._overlays: EventedDict[str, SceneOverlay] = EventedDict()
 
         self.events = EmitterGroup(
             source=self,
@@ -738,7 +738,7 @@ class Layer(KeymapProvider, MousemapProvider, ABC):
         return self._private_is_moving
 
     @_is_moving.setter
-    def _is_moving(self, value):
+    def _is_moving(self, value: bool):
         assert value in (True, False)
         if value:
             assert self._moving_coordinates is not None
@@ -1113,7 +1113,7 @@ class Layer(KeymapProvider, MousemapProvider, ABC):
 
     def get_value(
         self,
-        position: Tuple[float],
+        position: Tuple[float, float, float],
         *,
         view_direction: Optional[np.ndarray] = None,
         dims_displayed: Optional[List[int]] = None,
@@ -1282,7 +1282,7 @@ class Layer(KeymapProvider, MousemapProvider, ABC):
             self._update_thumbnail()
             self._set_highlight(force=True)
 
-    def world_to_data(self, position):
+    def world_to_data(self, position) -> Tuple[float, float, float]:
         """Convert from world coordinates to data coordinates.
 
         Parameters
@@ -1671,7 +1671,7 @@ class Layer(KeymapProvider, MousemapProvider, ABC):
             )
             if any(s == 0 for s in display_shape):
                 return
-            if self.data_level != level or not np.all(
+            if self._data_level != level or not np.all(
                 self.corner_pixels == corners
             ):
                 self._data_level = level
@@ -1740,7 +1740,7 @@ class Layer(KeymapProvider, MousemapProvider, ABC):
 
     def get_status(
         self,
-        position: Optional[Tuple[float, ...]] = None,
+        position: Tuple[float, ...],
         *,
         view_direction: Optional[np.ndarray] = None,
         dims_displayed: Optional[List[int]] = None,
@@ -1853,7 +1853,7 @@ class Layer(KeymapProvider, MousemapProvider, ABC):
 
     @classmethod
     def create(
-        cls, data, meta: dict = None, layer_type: Optional[str] = None
+        cls, data, meta: Optional[dict] = None, layer_type: Optional[str] = None
     ) -> Layer:
         """Create layer from `data` of type `layer_type`.
 
@@ -1898,23 +1898,23 @@ class Layer(KeymapProvider, MousemapProvider, ABC):
         from napari import layers
         from napari.layers.image._image_utils import guess_labels
 
-        layer_type = (layer_type or '').lower()
+        layer_type_str = (layer_type or '').lower()
 
         # assumes that big integer type arrays are likely labels.
-        if not layer_type:
-            layer_type = guess_labels(data)
+        if not layer_type_str:
+            layer_type_str = guess_labels(data)
 
-        if layer_type not in layers.NAMES:
+        if layer_type_str not in layers.NAMES:
             raise ValueError(
                 trans._(
                     "Unrecognized layer_type: '{layer_type}'. Must be one of: {layer_names}.",
                     deferred=True,
-                    layer_type=layer_type,
+                    layer_type=layer_type_str,
                     layer_names=layers.NAMES,
                 )
             )
 
-        Cls = getattr(layers, layer_type.title())
+        Cls = getattr(layers, layer_type_str.title())
 
         try:
             return Cls(data, **(meta or {}))
