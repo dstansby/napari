@@ -233,23 +233,23 @@ class Image(IntensityVisualizationMixin, ScalarFieldBase):
         data,
         *,
         affine=None,
-        attenuation=0.05,
+        attenuation: float = 0.05,
         axis_labels=None,
         blending='translucent',
-        cache=True,
+        cache: bool = True,
         colormap='gray',
         contrast_limits=None,
         custom_interpolation_kernel_2d=None,
         depiction='volume',
         experimental_clipping_planes=None,
-        gamma=1.0,
+        gamma: float = 1.0,
         interpolation2d='nearest',
         interpolation3d='linear',
         iso_threshold=None,
         metadata=None,
         multiscale=None,
         name=None,
-        opacity=1.0,
+        opacity: float = 1.0,
         plane=None,
         projection_mode='none',
         rendering='mip',
@@ -259,8 +259,8 @@ class Image(IntensityVisualizationMixin, ScalarFieldBase):
         shear=None,
         translate=None,
         units=None,
-        visible=True,
-    ):
+        visible: bool = True,
+    ) -> None:
         # Determine if rgb
         data_shape = data.shape if hasattr(data, 'shape') else data[0].shape
         rgb_guess = guess_rgb(data_shape)
@@ -363,11 +363,11 @@ class Image(IntensityVisualizationMixin, ScalarFieldBase):
         return str(self._rendering)
 
     @rendering.setter
-    def rendering(self, rendering):
+    def rendering(self, rendering) -> None:
         self._rendering = ImageRendering(rendering)
         self.events.rendering()
 
-    def _get_state(self):
+    def _get_state(self) -> dict:
         """Get dictionary of layer state.
 
         Returns
@@ -561,7 +561,7 @@ class Image(IntensityVisualizationMixin, ScalarFieldBase):
             shapes = [s[:-1] for s in shapes]
         return shapes
 
-    def _update_thumbnail(self):
+    def _update_thumbnail(self) -> None:
         """Update thumbnail with current image data and colormap."""
         # don't bother updating thumbnail if we don't have any data
         # this also avoids possible dtype mismatch issues below
@@ -674,7 +674,7 @@ class Image(IntensityVisualizationMixin, ScalarFieldBase):
         return fixed_contrast_info.coerce_data(raw)
 
     @IntensityVisualizationMixin.contrast_limits.setter  # type: ignore [attr-defined]
-    def contrast_limits(self, contrast_limits):
+    def contrast_limits(self, contrast_limits) -> None:
         IntensityVisualizationMixin.contrast_limits.fset(self, contrast_limits)
         if not np.allclose(
             _coerce_contrast_limits(self.contrast_limits).contrast_limits,
